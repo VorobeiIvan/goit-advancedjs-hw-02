@@ -14,7 +14,7 @@ function getRandomHexColor() {
 // Функція для анімації зміни кольору
 function animateColorChange() {
     body.style.backgroundColor = getRandomHexColor();
-    animationFrameId = requestAnimationFrame(animateColorChange);
+    animationFrameId = requestAnimationFrame(animateColorChange, 1000);
 }
 
 // Кнопка старт зміни кольору
