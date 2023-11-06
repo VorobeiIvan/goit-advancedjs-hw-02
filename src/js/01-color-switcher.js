@@ -16,7 +16,7 @@ function colorChange() {
 // Кнопка старт зміни кольору
 buttonStart.addEventListener("click", () => {
     if (!animation) {
-        animation = setInterval(colorChange, 3000);
+        animation = setInterval(colorChange, 1000);
         buttonStart.setAttribute("disabled", "disabled");
         buttonStop.removeAttribute("disabled");
         colorChange();
