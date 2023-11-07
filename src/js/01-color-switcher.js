@@ -8,6 +8,7 @@ const body = document.querySelector('.js-body');
 const buttonStart = document.querySelector('.js-buttonStart');
 const buttonStop = document.querySelector('.js-buttonStop');
 let animation = null;
+buttonStop.setAttribute('disabled', 'disabled');
 
 function animateColorChange() {
   body.style.backgroundColor = getRandomHexColor();
