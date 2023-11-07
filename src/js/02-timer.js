@@ -1,7 +1,7 @@
-import flatpickr from "flatpickr";
-import "flatpickr/dist/flatpickr.min.css";
-import iziToast from "izitoast";
-import "izitoast/dist/css/iziToast.min.css";
+import flatpickr from 'flatpickr';
+import 'flatpickr/dist/flatpickr.min.css';
+import iziToast from 'izitoast';
+import 'izitoast/dist/css/iziToast.min.css';
 
 const elements = {
   startBtn: document.querySelector('.js-startBtn'),
@@ -9,21 +9,69 @@ const elements = {
   days: document.querySelector('.js-days'),
   hours: document.querySelector('.js-hours'),
   minutes: document.querySelector('.js-minutes'),
-  seconds: document.querySelector('.js-seconds')
+  seconds: document.querySelector('.js-seconds'),
 };
 
 elements.startBtn.setAttribute('disabled', 'disabled');
 
-let selectedDate;
-let now;
 let timerInterval;
+let ms = 0;
+const now = new Date();
 
-flatpickr("input#datetime-picker", {
-  enableTime: true,
-  time_24hr: true,
-  dateFormat: "Y-m-d H:i:S",
-});
+const options = {
+  enableTime: true, //Вмикає засіб вибору часу
+  time_24hr: true, // Відображає засіб вибору часу в 24-годинному режимі без вибору AM/PM, якщо ввімкнено.
+  defaultDate: new Date(), //Встановлює початкові вибрані дати.Якщо ви використовуєте mode: "multiple"календар діапазону, надайте Arrayоб’єкти Dateабо масив рядків дат, які слідують за вашим dateFormat.В іншому випадку ви можете надати один об’єкт Date або рядок дати
+  minuteIncrement: 1, //Регулює крок для введення хвилин (включно з прокручуванням)
+  onClose(selectedDates) {
+    //Функції, які запускаються щоразу, коли календар закривається. Перегляньте  API подій
+    displayTimer(selectedDates);
+  },
+};
+function displayTimer(selectedDates) {
+  const selectedDate = selectedDates[0];
+  if (selectedDate > now) {
+    ms = selectedDate - now;
+    const { days, hours, minutes, seconds } = convertMs(ms);
 
+    elements.days.textContent = addLeadingZero(days);
+    elements.hours.textContent = addLeadingZero(hours);
+    elements.minutes.textContent = addLeadingZero(minutes);
+    elements.seconds.textContent = addLeadingZero(seconds);
+
+    elements.startBtn.removeAttribute('disabled');
+  } else {
+    errorAlert();
+    elements.startBtn.setAttribute('disabled', 'disabled');
+
+    elements.days.textContent = '00';
+    elements.hours.textContent = '00';
+    elements.minutes.textContent = '00';
+    elements.seconds.textContent = '00';
+  }
+}
+// Функція для перетворення мілісекунд в об'єкт з днями, годинами, хвилинами та секундами
+function convertMs(ms) {
+  const second = 1000;
+  const minute = second * 60;
+  const hour = minute * 60;
+  const day = hour * 24;
+
+  const days = Math.floor(ms / day);
+  const hours = Math.floor((ms % day) / hour);
+  const minutes = Math.floor(((ms % day) % hour) / minute);
+  const seconds = Math.floor((((ms % day) % hour) % minute) / second);
+
+  return { days, hours, minutes, seconds };
+}
+
+function addLeadingZero(value) {
+  return value < 10 ? '0' + value : value.toString();
+}
+
+flatpickr('.js-input', options); // календар
+
+// Функція виведення помилки
 function errorAlert() {
   iziToast.error({
     title: 'Error',
@@ -36,52 +84,6 @@ function errorAlert() {
   });
 }
 
-function displayTimer() {
-  let days = selectedDate.getDate() - now.getDate();
-  let hours = selectedDate.getHours() - now.getHours();
-  let minutes = selectedDate.getMinutes() - now.getMinutes();
-  let seconds = selectedDate.getSeconds() - now.getSeconds();
-
-  if (seconds < 0) {
-    seconds = 60 + seconds;
-    minutes = minutes - 1;
-  }
-  if (minutes < 0) {
-    minutes = 60 + minutes;
-    hours = hours - 1;
-  }
-  if (hours < 0) {
-    hours = 24 + hours;
-    days = days - 1;
-  }
-
-  elements.days.textContent = days < 10 ? "0" + days : days;
-  elements.hours.textContent = hours < 10 ? "0" + hours : hours;
-  elements.minutes.textContent = minutes < 10 ? "0" + minutes : minutes;
-  elements.seconds.textContent = seconds < 10 ? "0" + seconds : seconds;
-}
-
-elements.input.addEventListener("input", selectionTime);
-
-function selectionTime() {
-  now = new Date();
-  let minTime = now.setMinutes(now.getMinutes() + 1);
-  selectedDate = new Date(elements.input.value);
-
-  if (selectedDate > minTime) {
-    displayTimer();
-    elements.startBtn.removeAttribute('disabled');
-  } else {
-    errorAlert();
-    elements.startBtn.setAttribute('disabled', 'disabled');
-
-    elements.days.textContent = '00';
-    elements.hours.textContent = '00';
-    elements.minutes.textContent = '00';
-    elements.seconds.textContent = '00';
-  }
-}
-
 elements.startBtn.addEventListener('click', startTimer);
 
 function startTimer() {
@@ -90,14 +92,9 @@ function startTimer() {
   }
 
   timerInterval = setInterval(() => {
-    displayTimer();
-
-    if (
-      elements.days.textContent === "00" &&
-      elements.hours.textContent === "00" &&
-      elements.minutes.textContent === "00" &&
-      elements.seconds.textContent === "00"
-    ) {
+    displayTimer(now);
+    ms -= 1000;
+    if (ms <= 0) {
       clearInterval(timerInterval);
     }
   }, 1000);
