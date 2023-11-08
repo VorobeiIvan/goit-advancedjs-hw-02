@@ -14,42 +14,28 @@ const elements = {
 
 elements.startBtn.setAttribute('disabled', 'disabled');
 
-let timerInterval;
-let ms = 0;
-const now = new Date();
-
 const options = {
-  enableTime: true, //Вмикає засіб вибору часу
-  time_24hr: true, // Відображає засіб вибору часу в 24-годинному режимі без вибору AM/PM, якщо ввімкнено.
-  defaultDate: new Date(), //Встановлює початкові вибрані дати.Якщо ви використовуєте mode: "multiple"календар діапазону, надайте Arrayоб’єкти Dateабо масив рядків дат, які слідують за вашим dateFormat.В іншому випадку ви можете надати один об’єкт Date або рядок дати
-  minuteIncrement: 1, //Регулює крок для введення хвилин (включно з прокручуванням)
+  enableTime: true,
+  time_24hr: true,
+  defaultDate: new Date(), 
+  minuteIncrement: 1, 
   onClose(selectedDates) {
-    //Функції, які запускаються щоразу, коли календар закривається. Перегляньте  API подій
-    displayTimer(selectedDates);
+    const now = new Date();
+    const selectedDate = selectedDates[0];
+    if (selectedDate > now) {
+      elements.startBtn.removeAttribute('disabled');
+    } else {
+      errorAlert();
+      elements.startBtn.setAttribute('disabled', 'disabled');
+  
+      elements.days.textContent = '00';
+      elements.hours.textContent = '00';
+      elements.minutes.textContent = '00';
+      elements.seconds.textContent = '00';
+    }
   },
 };
-function displayTimer(selectedDates) {
-  const selectedDate = selectedDates[0];
-  if (selectedDate > now) {
-    ms = selectedDate - now;
-    const { days, hours, minutes, seconds } = convertMs(ms);
 
-    elements.days.textContent = addLeadingZero(days);
-    elements.hours.textContent = addLeadingZero(hours);
-    elements.minutes.textContent = addLeadingZero(minutes);
-    elements.seconds.textContent = addLeadingZero(seconds);
-
-    elements.startBtn.removeAttribute('disabled');
-  } else {
-    errorAlert();
-    elements.startBtn.setAttribute('disabled', 'disabled');
-
-    elements.days.textContent = '00';
-    elements.hours.textContent = '00';
-    elements.minutes.textContent = '00';
-    elements.seconds.textContent = '00';
-  }
-}
 // Функція для перетворення мілісекунд в об'єкт з днями, годинами, хвилинами та секундами
 function convertMs(ms) {
   const second = 1000;
@@ -91,8 +77,19 @@ function startTimer() {
     clearInterval(timerInterval);
   }
 
+  let timerInterval;
   timerInterval = setInterval(() => {
-    displayTimer(now);
+    let ms = 0;
+    const now = new Date();
+    convertMs(ms)
+
+    ms = selectedDate - now;
+    const { days, hours, minutes, seconds } = convertMs(ms);
+
+    elements.days.textContent = addLeadingZero(days);
+    elements.hours.textContent = addLeadingZero(hours);
+    elements.minutes.textContent = addLeadingZero(minutes);
+    elements.seconds.textContent = addLeadingZero(seconds);
     ms -= 1000;
     if (ms <= 0) {
       clearInterval(timerInterval);

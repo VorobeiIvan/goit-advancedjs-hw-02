@@ -16,7 +16,7 @@ function animateColorChange() {
 
 buttonStart.addEventListener('click', () => {
   if (!animation) {
-    animation = setInterval(animateColorChange, 500);
+    animation = setInterval(animateColorChange, 1000);
     buttonStart.setAttribute('disabled', 'disabled');
     buttonStop.removeAttribute('disabled');
     animateColorChange();
