@@ -13,12 +13,13 @@ const elements = {
 };
 
 elements.startBtn.setAttribute('disabled', 'disabled');
+let timerInterval;
 
 const options = {
   enableTime: true,
   time_24hr: true,
-  defaultDate: new Date(), 
-  minuteIncrement: 1, 
+  defaultDate: new Date(),
+  minuteIncrement: 1,
   onClose(selectedDates) {
     const now = new Date();
     const selectedDate = selectedDates[0];
@@ -27,7 +28,6 @@ const options = {
     } else {
       errorAlert();
       elements.startBtn.setAttribute('disabled', 'disabled');
-  
       elements.days.textContent = '00';
       elements.hours.textContent = '00';
       elements.minutes.textContent = '00';
@@ -36,28 +36,12 @@ const options = {
   },
 };
 
-// Функція для перетворення мілісекунд в об'єкт з днями, годинами, хвилинами та секундами
-function convertMs(ms) {
-  const second = 1000;
-  const minute = second * 60;
-  const hour = minute * 60;
-  const day = hour * 24;
-
-  const days = Math.floor(ms / day);
-  const hours = Math.floor((ms % day) / hour);
-  const minutes = Math.floor(((ms % day) % hour) / minute);
-  const seconds = Math.floor((((ms % day) % hour) % minute) / second);
-
-  return { days, hours, minutes, seconds };
-}
+flatpickr('.js-input', options);
 
 function addLeadingZero(value) {
   return value < 10 ? '0' + value : value.toString();
 }
 
-flatpickr('.js-input', options); // календар
-
-// Функція виведення помилки
 function errorAlert() {
   iziToast.error({
     title: 'Error',
@@ -70,29 +54,53 @@ function errorAlert() {
   });
 }
 
-elements.startBtn.addEventListener('click', startTimer);
 
-function startTimer() {
+elements.startBtn.addEventListener('click', () => {
+  const selectedDate = flatpickr.parseDate(elements.input.value, "Y-m-d H:i");
+  const now = new Date();
+
+  if (selectedDate <= now) {
+    errorAlert();
+    return;
+  }
+
   if (timerInterval) {
     clearInterval(timerInterval);
   }
 
-  let timerInterval;
-  timerInterval = setInterval(() => {
-    let ms = 0;
-    const now = new Date();
-    convertMs(ms)
+  startTimer(selectedDate, now);
+});
 
-    ms = selectedDate - now;
+function startTimer(selectedDate, now) {
+  timerInterval = setInterval(() => {
+    const ms = selectedDate - now;
+
+    if (ms <= 0) {
+      clearInterval(timerInterval);
+      return;
+    }
+
     const { days, hours, minutes, seconds } = convertMs(ms);
 
     elements.days.textContent = addLeadingZero(days);
     elements.hours.textContent = addLeadingZero(hours);
     elements.minutes.textContent = addLeadingZero(minutes);
     elements.seconds.textContent = addLeadingZero(seconds);
-    ms -= 1000;
-    if (ms <= 0) {
-      clearInterval(timerInterval);
-    }
+
+    now.setTime(now.getTime() + 1000);
   }, 1000);
+}
+
+function convertMs(ms) {
+  const second = 1000;
+  const minute = second * 60;
+  const hour = minute * 60;
+  const day = hour * 24;
+
+  const days = Math.floor(ms / day);
+  const hours = Math.floor((ms % day) / hour);
+  const minutes = Math.floor(((ms % day) % hour) / minute);
+  const seconds = Math.floor(((ms % day) % hour) % minute / second);
+
+  return { days, hours, minutes, seconds };
 }
