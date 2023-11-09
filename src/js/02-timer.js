@@ -54,9 +54,8 @@ function errorAlert() {
   });
 }
 
-
 elements.startBtn.addEventListener('click', () => {
-  const selectedDate = flatpickr.parseDate(elements.input.value, "Y-m-d H:i");
+  const selectedDate = flatpickr.parseDate(elements.input.value, 'Y-m-d H:i');
   const now = new Date();
 
   if (selectedDate <= now) {
@@ -74,9 +73,11 @@ elements.startBtn.addEventListener('click', () => {
 function startTimer(selectedDate, now) {
   timerInterval = setInterval(() => {
     const ms = selectedDate - now;
-
+    elements.startBtn.setAttribute('disabled', 'disabled');
+    elements.input.setAttribute('disabled', 'disabled');
     if (ms <= 0) {
       clearInterval(timerInterval);
+      elements.input.removeAttribute('disabled');
       return;
     }
 
@@ -100,7 +101,7 @@ function convertMs(ms) {
   const days = Math.floor(ms / day);
   const hours = Math.floor((ms % day) / hour);
   const minutes = Math.floor(((ms % day) % hour) / minute);
-  const seconds = Math.floor(((ms % day) % hour) % minute / second);
+  const seconds = Math.floor((((ms % day) % hour) % minute) / second);
 
   return { days, hours, minutes, seconds };
 }

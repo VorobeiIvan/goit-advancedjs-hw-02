@@ -7,7 +7,7 @@ function getRandomHexColor() {
 const body = document.querySelector('.js-body');
 const buttonStart = document.querySelector('.js-buttonStart');
 const buttonStop = document.querySelector('.js-buttonStop');
-let animation = null;
+let intervalId = null;
 buttonStop.setAttribute('disabled', 'disabled');
 
 function animateColorChange() {
@@ -15,8 +15,8 @@ function animateColorChange() {
 }
 
 buttonStart.addEventListener('click', () => {
-  if (!animation) {
-    animation = setInterval(animateColorChange, 1000);
+  if (!intervalId) {
+    intervalId = setInterval(animateColorChange, 1000);
     buttonStart.setAttribute('disabled', 'disabled');
     buttonStop.removeAttribute('disabled');
     animateColorChange();
@@ -24,9 +24,9 @@ buttonStart.addEventListener('click', () => {
 });
 
 buttonStop.addEventListener('click', () => {
-  if (animation) {
-    clearInterval(animation);
-    animation = null;
+  if (intervalId) {
+    clearInterval(intervalId);
+    intervalId = null;
     buttonStop.setAttribute('disabled', 'disabled');
     buttonStart.removeAttribute('disabled');
   }
