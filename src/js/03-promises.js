@@ -27,6 +27,9 @@ function handlerCreatePromise(evt) {
 
     promises.push(promise);
   }
+
+  form.reset();
+
 }
 
 function createPromise(position, delay) {
